@@ -1,0 +1,86 @@
+-- xxhash regression tests
+\set VERBOSITY terse
+\pset null 'NULL'
+CREATE EXTENSION pg_xxhash;
+-- All tests below should return NULL
+SELECT pg_xxhash64(NULL);
+ pg_xxhash64 
+-------------
+        NULL
+(1 row)
+
+SELECT pg_xxhash64(NULL, NULL);
+ pg_xxhash64 
+-------------
+        NULL
+(1 row)
+
+SELECT pg_xxhash64('foo', NULL);
+ pg_xxhash64 
+-------------
+        NULL
+(1 row)
+
+SELECT pg_xxhash64(NULL, 0);
+ pg_xxhash64 
+-------------
+        NULL
+(1 row)
+
+-- Testing using default seed = 0
+SELECT pg_xxhash64('foo'); -- default seed = 0
+     pg_xxhash64     
+---------------------
+ 3728699739546630719
+(1 row)
+
+SELECT pg_xxhash64('foo', 0);
+     pg_xxhash64     
+---------------------
+ 3728699739546630719
+(1 row)
+
+SELECT pg_xxhash64('foo') = pg_xxhash64('foo', 0); -- should be TRUE
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT pg_xxhash64('foo') = pg_xxhash64('foo', 1); -- should be FALSE
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT pg_xxhash64('foo') = pg_xxhash64('foo', NULL); -- should be NULL
+ ?column? 
+----------
+ NULL
+(1 row)
+
+SELECT pg_xxhash64('foo') IS DISTINCT FROM pg_xxhash64('foo', NULL); -- should be TRUE
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Testing using an specific seeds
+SELECT pg_xxhash64('foo', 100);
+     pg_xxhash64     
+---------------------
+ 4679220945261188543
+(1 row)
+
+SELECT pg_xxhash64('foo', -100);
+     pg_xxhash64     
+---------------------
+ 4918571626677971423
+(1 row)
+
+SELECT pg_xxhash64('foo', 100) = pg_xxhash64('foo', -100); -- should be FALSE
+ ?column? 
+----------
+ f
+(1 row)
+
+DROP EXTENSION pg_xxhash;
